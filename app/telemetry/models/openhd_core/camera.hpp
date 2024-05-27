@@ -84,6 +84,11 @@ static constexpr int X_CAM_TYPE_ROCK_IMX219 = 81;
 static constexpr int X_CAM_TYPE_OPENIPC_SOMETHING = 90;
 //
 
+// Custom cameras starts here
+// GSTiR thermal camera
+static constexpr int X_CAM_TYPE_CUSTOM_GSTIR = 240;
+//
+
 // ... rest is reserved for future use
 // no camera, only exists to have a default value for secondary camera (which is
 // disabled by default). NOTE: The primary camera cannot be disabled !
@@ -150,6 +155,8 @@ static std::string x_cam_type_to_string(int camera_type) {
       return "DISABLED";
     case X_CAM_TYPE_OPENIPC_SOMETHING:
       return "OPENIPC_X";
+    case X_CAM_TYPE_CUSTOM_GSTIR:
+      return "CUSTOM_GSTIR";
     default:
       break;
   }
@@ -297,7 +304,12 @@ struct XCamera {
       ret.push_back(ResolutionFramerate{1280, 720, 60});
       ret.push_back(ResolutionFramerate{1920, 1080, 60});
       return ret;
+    } else if (camera_type == X_CAM_TYPE_CUSTOM_GSTIR) {
+      std::vector<ResolutionFramerate> ret;
+      ret.push_back(ResolutionFramerate{640, 512, 30});
+      return ret;
     }
+
     // Not mapped yet
     // return something that might work or might not work
     return {ResolutionFramerate{640, 480, 30}};

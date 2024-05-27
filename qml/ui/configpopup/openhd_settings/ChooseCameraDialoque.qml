@@ -104,6 +104,7 @@ Card {
         ListElement {title: "ARDUCAM"}
         ListElement {title: "RADXA"}
         ListElement {title: "USB"}
+        ListElement {title: "CUSTOM"}
         ListElement {title: "DEV/DEBUG"}
     }
     ListModel{
@@ -170,6 +171,10 @@ Card {
         id: rock_arducam_cameras
         ListElement {title: "ARDUCAM ROCK 0"; value: 0}
         ListElement {title: "ARDUCAM ROCK 1"; value: 1}
+    }
+    ListModel{
+        id: rock_custom_cameras
+        ListElement {title: "GSTIR COIN 612"; value: 240}
     }
     ListModel{
         id: rock_raxca_cameras
@@ -267,6 +272,8 @@ Card {
                 return rock_raxca_cameras;
             }else if(index_manufacturer==2){
                 return cameras_usb;
+            }else if(index_manufacturer==3){
+                return rock_custom_cameras;
             }else{
                 return cameras_debug;
             }
