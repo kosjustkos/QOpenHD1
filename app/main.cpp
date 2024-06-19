@@ -1,39 +1,38 @@
 #include "qqmlcontext.h"
 #include "qscreen.h"
 #include <QApplication>
-#include <QQmlApplicationEngine>
-#include <QQmlComponent>
 #include <QDebug>
 #include <QFontDatabase>
+#include <QQmlApplicationEngine>
+#include <QQmlComponent>
 #if defined(__android__)
 #include <QtAndroid>
 #endif
 
-#include "telemetry/models/fcmavlinksystem.h"
-#include "telemetry/action/fcaction.h"
-#include "telemetry/action/ohdaction.h"
-#include "telemetry/models/fcmavlinkmissionitemsmodel.h"
-#include "telemetry/action/fcmissionhandler.h"
-#include "telemetry/models/camerastreammodel.h"
-#include "telemetry/models/aohdsystem.h"
-#include "telemetry/models/wificard.h"
-#include "telemetry/MavlinkTelemetry.h"
-#include "telemetry/models/rcchannelsmodel.h"
-#include "telemetry/models/markermodel.h"
-#include "telemetry/settings/mavlinksettingsmodel.h"
-#include "telemetry/settings/wblinksettingshelper.h"
-#include "telemetry/settings/frequencyhelper.h"
-#include "telemetry/settings/pollutionhelper.h"
-#include "osd/speedladder.h"
-#include "osd/altitudeladder.h"
-#include "osd/headingladder.h"
-#include "osd/horizonladder.h"
-#include "osd/flightpathvector.h"
-#include "osd/aoagauge.h"
 #include "adsb/adsbvehicle.h"
 #include "adsb/adsbvehiclemanager.h"
 #include "adsb/qmlobjectlistmodel.h"
-
+#include "osd/altitudeladder.h"
+#include "osd/aoagauge.h"
+#include "osd/flightpathvector.h"
+#include "osd/headingladder.h"
+#include "osd/horizonladder.h"
+#include "osd/speedladder.h"
+#include "telemetry/MavlinkTelemetry.h"
+#include "telemetry/action/fcaction.h"
+#include "telemetry/action/fcmissionhandler.h"
+#include "telemetry/action/ohdaction.h"
+#include "telemetry/models/aohdsystem.h"
+#include "telemetry/models/camerastreammodel.h"
+#include "telemetry/models/fcmavlinkmissionitemsmodel.h"
+#include "telemetry/models/fcmavlinksystem.h"
+#include "telemetry/models/markermodel.h"
+#include "telemetry/models/rcchannelsmodel.h"
+#include "telemetry/models/wificard.h"
+#include "telemetry/settings/frequencyhelper.h"
+#include "telemetry/settings/mavlinksettingsmodel.h"
+#include "telemetry/settings/pollutionhelper.h"
+#include "telemetry/settings/wblinksettingshelper.h"
 
 // Video - annyoing ifdef crap is needed for all the different platforms / configurations
 #include "decodingstatistcs.h"
@@ -43,7 +42,7 @@
 #ifdef QOPENHD_ENABLE_GSTREAMER_QMLGLSINK
 #include "videostreaming/gstreamer/gst_helper.hpp"
 #include "videostreaming/gstreamer/gstqmlglsinkstream.h"
-#endif //QOPENHD_ENABLE_GSTREAMER_QMLGLSINK
+#endif // QOPENHD_ENABLE_GSTREAMER_QMLGLSINK
 #ifdef QOPENHD_ENABLE_VIDEO_VIA_ANDROID
 #include <videostreaming/android/qandroidmediaplayer.h>
 #include <videostreaming/android/qsurfacetexture.h>
@@ -58,11 +57,12 @@
 #include "platform/appleplatform.h"
 #endif
 
-#include "logging/logmessagesmodel.h"
 #include "logging/hudlogmessagesmodel.h"
-#include "util/qopenhd.h"
-#include "util/mousehelper.h"
+#include "logging/logmessagesmodel.h"
 #include "util/WorkaroundMessageBox.h"
+#include "util/ground_video_recorder.h"
+#include "util/mousehelper.h"
+#include "util/qopenhd.h"
 #include "util/restartqopenhdmessagebox.h"
 
 #if defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 3
@@ -70,9 +70,12 @@ RESOLVEFUNC(SSL_get1_peer_certificate);
 RESOLVEFUNC(EVP_PKEY_get_base_id);
 #endif // OPENSSL_VERSION_MAJOR >= 3
 
+// #include <xf86drm.h>
+// #include <xf86drmMode.h>
 
 // Load all the fonts we use ?!
-static void load_fonts(){
+static void load_fonts()
+{
     QFontDatabase::addApplicationFont(":/resources/Font Awesome 5 Free-Solid-900.otf");
     QFontDatabase::addApplicationFont(":/resources/osdicons.ttf");
     QFontDatabase::addApplicationFont(":/resources/materialdesignicons-webfont.ttf");
@@ -132,7 +135,8 @@ static void load_fonts(){
 }
 
 // Write context properties for all platforms, e.g. such that we have boolean variable(s) accessible from .qml
-static void write_platform_context_properties(QQmlApplicationEngine& engine){
+static void write_platform_context_properties(QQmlApplicationEngine &engine)
+{
 #if defined(__android__)
     engine.rootContext()->setContextProperty("IsAndroid", QVariant(true));
 #else
@@ -176,20 +180,24 @@ static void write_platform_context_properties(QQmlApplicationEngine& engine){
 #endif
 }
 
-static void android_check_permissions(){
+static void android_check_permissions()
+{
 #if defined(__android__)
     const QVector<QString> permissions({"android.permission.INTERNET",
                                         "android.permission.WRITE_EXTERNAL_STORAGE",
                                         "android.permission.READ_EXTERNAL_STORAGE",
                                         "android.permission.ACCESS_NETWORK_STATE",
                                         "android.permission.ACCESS_FINE_LOCATION"});
-    qDebug()<<"Android request permissions";
-    for(const QString &permission : permissions) {
+    qDebug() << "Android request permissions";
+    for (const QString &permission : permissions)
+    {
         auto result = QtAndroid::checkPermission(permission);
-        if (result == QtAndroid::PermissionResult::Denied) {
+        if (result == QtAndroid::PermissionResult::Denied)
+        {
             auto resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
-            if (resultHash[permission] == QtAndroid::PermissionResult::Denied) {
-                LogMessagesModel::instanceGround().add_message_warn("QOpenHD","Android - missing permissions");
+            if (resultHash[permission] == QtAndroid::PermissionResult::Denied)
+            {
+                LogMessagesModel::instanceGround().add_message_warn("QOpenHD", "Android - missing permissions");
                 return;
             }
         }
@@ -197,91 +205,104 @@ static void android_check_permissions(){
 #endif
 }
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[])
+{
     QCoreApplication::setOrganizationName("OpenHD");
     QCoreApplication::setOrganizationDomain("openhd");
     QCoreApplication::setApplicationName("QOpenHD");
-    {// Original screen resoluton before setting anything
-        //QApplication a(argc, argv);
-        const auto screen=QGuiApplication::primaryScreen();
-        if(screen){
-            const auto actual_size=screen->size();
-            QRenderStats::instance().set_screen_width_height(actual_size.width(),actual_size.height());
+    { // Original screen resoluton before setting anything
+        // QApplication a(argc, argv);
+        const auto screen = QGuiApplication::primaryScreen();
+        if (screen)
+        {
+            const auto actual_size = screen->size();
+            QRenderStats::instance().set_screen_width_height(actual_size.width(), actual_size.height());
         }
         // a is deleted again
     }
-    
+
     QSettings settings;
-    qDebug()<<"Storing settings at ["<<settings.fileName()<<"]";
+    qDebug() << "Storing settings at [" << settings.fileName() << "]";
     // RPI and ROCK - disable font dpi. The user has to scale manually when using displays
     // (Big screens) according to its preferences. Auto scale is just bugged,
     // nothing more to say.
-    if(QOpenHD::instance().is_platform_rpi() || QOpenHD::instance().is_platform_rock()){
-        static constexpr auto TAG_QOPENHD_INITIAL_FONT_DPI_HAS_BEEN_SET="qopenhd_initial_font_dpi_has_been_set";
-        if(!settings.value(TAG_QOPENHD_INITIAL_FONT_DPI_HAS_BEEN_SET,false).toBool()){
-            qDebug()<<"RPI/ROCK: Disable font dpi by default with setting it to 100%";
-            settings.setValue(TAG_QOPENHD_INITIAL_FONT_DPI_HAS_BEEN_SET,true);
-            settings.setValue("screen_custom_font_dpi",100);
+    if (QOpenHD::instance().is_platform_rpi() || QOpenHD::instance().is_platform_rock())
+    {
+        static constexpr auto TAG_QOPENHD_INITIAL_FONT_DPI_HAS_BEEN_SET = "qopenhd_initial_font_dpi_has_been_set";
+        if (!settings.value(TAG_QOPENHD_INITIAL_FONT_DPI_HAS_BEEN_SET, false).toBool())
+        {
+            qDebug() << "RPI/ROCK: Disable font dpi by default with setting it to 100%";
+            settings.setValue(TAG_QOPENHD_INITIAL_FONT_DPI_HAS_BEEN_SET, true);
+            settings.setValue("screen_custom_font_dpi", 100);
         }
     }
-    if(QOpenHD::instance().is_platform_rock()){
-        if(!settings.value("dev_rpi_use_external_omx_decode_service",true).toBool()){
-            qDebug()<<"Disabling RPI decode!";
-            settings.setValue("dev_rpi_use_external_omx_decode_service",false);
+    if (QOpenHD::instance().is_platform_rock())
+    {
+        if (!settings.value("dev_rpi_use_external_omx_decode_service", true).toBool())
+        {
+            qDebug() << "Disabling RPI decode!";
+            settings.setValue("dev_rpi_use_external_omx_decode_service", false);
         }
-        if(!settings.value("dev_always_use_generic_external_decode_service",false).toBool()){
-            qDebug()<<"Enable rockchip HW decoding!";
-            settings.setValue("dev_always_use_generic_external_decode_service",true);
+        if (!settings.value("dev_always_use_generic_external_decode_service", false).toBool())
+        {
+            qDebug() << "Enable rockchip HW decoding!";
+            settings.setValue("dev_always_use_generic_external_decode_service", true);
         }
     }
     const int screen_custom_font_dpi = settings.value("screen_custom_font_dpi").toInt();
-    if(screen_custom_font_dpi<0){
+    if (screen_custom_font_dpi < 0)
+    {
         // Disabled
         QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
-    }else if(screen_custom_font_dpi==0){
+    }
+    else if (screen_custom_font_dpi == 0)
+    {
         // Enabled (whatever qt thinks it wanna do on auto). Works on android, on other devices, meh
-         QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    }else{
+        QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    }
+    else
+    {
         // Custom font dpi set by the user
         QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
         const std::string font_dpi_s = std::to_string(screen_custom_font_dpi);
         qputenv("QT_FONT_DPI", QByteArray(font_dpi_s.c_str(), font_dpi_s.length()));
     }
-    //QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
-    //QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+    // QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
+    // QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
     const double global_scale = settings.value("global_scale", 1.0).toDouble();
     const std::string global_scale_s = std::to_string(global_scale);
     qputenv("QT_SCALE_FACTOR", QByteArray(global_scale_s.c_str(), global_scale_s.length()));
 
     // https://doc.qt.io/qt-6/qtquick-visualcanvas-scenegraph-renderer.html
-    //qputenv("QSG_VISUALIZE", "overdraw");
-    //qputenv("QSG_VISUALIZE", "batches");
-    //qputenv("QSG_VISUALIZE", "changes");
-    //QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
-    //QLoggingCategory::setFilterRules("qt.scenegraph.*=true");
-    //QLoggingCategory::setFilterRules("qt.scenegraph.time.*=true");
-    //QLoggingCategory::setFilterRules("qt.scenegraph.general=true");
-    //QLoggingCategory::setFilterRules("qt.scenegraph.time.texture=true");
-    //QLoggingCategory::setFilterRules("qt.scenegraph.time.renderloop=true");
-    //QLoggingCategory::setFilterRules("qt.qpa.eglfs.*=true");
-    //QLoggingCategory::setFilterRules("qt.qpa.egl*=true");
+    // qputenv("QSG_VISUALIZE", "overdraw");
+    // qputenv("QSG_VISUALIZE", "batches");
+    // qputenv("QSG_VISUALIZE", "changes");
+    // QCoreApplication::setAttribute(Qt::AA_UseOpenGLES);
+    // QLoggingCategory::setFilterRules("qt.scenegraph.*=true");
+    // QLoggingCategory::setFilterRules("qt.scenegraph.time.*=true");
+    // QLoggingCategory::setFilterRules("qt.scenegraph.general=true");
+    // QLoggingCategory::setFilterRules("qt.scenegraph.time.texture=true");
+    // QLoggingCategory::setFilterRules("qt.scenegraph.time.renderloop=true");
+    // QLoggingCategory::setFilterRules("qt.qpa.eglfs.*=true");
+    // QLoggingCategory::setFilterRules("qt.qpa.egl*=true");
 
     // From https://stackoverflow.com/questions/63473541/how-to-dynamically-toggle-vsync-in-a-qt-application-at-runtime
     // Get rid of VSYNC if possible. Might / might not work. On my ubuntu nvidia & intel laptop, this at least seems to
     // result in tripple buffering with unlimited fps, a bit "better" regarding latency than default.
-    if(settings.value("dev_set_swap_interval_zero",false).toBool()){
-        qDebug()<<"Request swap interval of 0";
-        QSurfaceFormat format=QSurfaceFormat::defaultFormat();
+    if (settings.value("dev_set_swap_interval_zero", false).toBool())
+    {
+        qDebug() << "Request swap interval of 0";
+        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setSwapInterval(0);
         QSurfaceFormat::setDefaultFormat(format);
     }
 
     QApplication app(argc, argv);
-    {  // This includes dpi adjustment
-        QScreen* screen=app.primaryScreen();
-        if(screen){
-            QRenderStats::instance().set_display_width_height(screen->size().width(),screen->size().height());
+    { // This includes dpi adjustment
+        QScreen *screen = app.primaryScreen();
+        if (screen)
+        {
+            QRenderStats::instance().set_display_width_height(screen->size().width(), screen->size().height());
         }
     }
     QOpenHDVideoHelper::reset_qopenhd_switch_primary_secondary();
@@ -303,7 +324,6 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<FlightPathVector>("OpenHD", 1, 0, "FlightPathVector");
     qmlRegisterType<AoaGauge>("OpenHD", 1, 0, "AoaGauge");
 
-
     qmlRegisterUncreatableType<QmlObjectListModel>("OpenHD", 1, 0, "QmlObjectListModel", "Reference only");
 
     QQmlApplicationEngine engine;
@@ -320,8 +340,8 @@ int main(int argc, char *argv[]) {
 
     engine.rootContext()->setContextProperty("_qrenderstats", &QRenderStats::instance());
 
-    //engine.rootContext()->setContextProperty("_ohdlogMessagesModel", &LogMessagesModel::instanceOHD());
-    //engine.rootContext()->setContextProperty("_fclogMessagesModel", &LogMessagesModel::instanceFC());
+    // engine.rootContext()->setContextProperty("_ohdlogMessagesModel", &LogMessagesModel::instanceOHD());
+    // engine.rootContext()->setContextProperty("_fclogMessagesModel", &LogMessagesModel::instanceFC());
     engine.rootContext()->setContextProperty("_logGround", &LogMessagesModel::instanceGround());
     engine.rootContext()->setContextProperty("_logOpenhdAir", &LogMessagesModel::instanceOHDAir());
     engine.rootContext()->setContextProperty("_logFC", &LogMessagesModel::instanceFC());
@@ -355,17 +375,20 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("AdsbVehicleManager", adsbVehicleManager);
     adsbVehicleManager->onStarted();
     // video - a bit special
-    engine.rootContext()->setContextProperty("_decodingStatistics",&DecodingStatistcs::instance());
+    engine.rootContext()->setContextProperty("_decodingStatistics", &DecodingStatistcs::instance());
 
     // And then the main part
     engine.rootContext()->setContextProperty("_mavlinkTelemetry", &MavlinkTelemetry::instance());
 
+    // TODO: Add this to the QML engine with corresponding items
+    GroundVideoRecorder ground_video_recorder(FCMavlinkSystem::instance());
+
 // Platform - dependend video begin -----------------------------------------------------------------
 #ifdef QOPENHD_ENABLE_GSTREAMER_QMLGLSINK
-    init_gstreamer(argc,argv);
+    init_gstreamer(argc, argv);
     // NEEDED !! For QMLqlsink to work !!
     init_qmlglsink_and_log();
-#endif //QOPENHD_ENABLE_GSTREAMER_QMLGLSINK
+#endif // QOPENHD_ENABLE_GSTREAMER_QMLGLSINK
 
 #ifdef QOPENHD_ENABLE_GSTREAMER_QMLGLSINK
     engine.rootContext()->setContextProperty("QOPENHD_ENABLE_GSTREAMER_QMLGLSINK", QVariant(true));
@@ -397,37 +420,37 @@ int main(int argc, char *argv[]) {
     QAndroidMediaPlayer player;
     engine.rootContext()->setContextProperty("_mediaPlayer", &player);
 #else
-     engine.rootContext()->setContextProperty("QOPENHD_ENABLE_VIDEO_VIA_ANDROID", QVariant(false));
+    engine.rootContext()->setContextProperty("QOPENHD_ENABLE_VIDEO_VIA_ANDROID", QVariant(false));
 #endif
     platform_start_audio_streaming_if_enabled();
-// Platform - dependend video end  -----------------------------------------------------------------
+    // Platform - dependend video end  -----------------------------------------------------------------
 
     // This allows to use the defines as strings in qml
     engine.rootContext()->setContextProperty("QOPENHD_GIT_VERSION",
 #ifdef QOPENHD_GIT_VERSION
-        QVariant(QOPENHD_GIT_VERSION)
+                                             QVariant(QOPENHD_GIT_VERSION)
 #else
-        QVariant("unknown")
+                                             QVariant("unknown")
 #endif
     );
     engine.rootContext()->setContextProperty("QOPENHD_GIT_COMMIT_HASH",
 #ifdef QOPENHD_GIT_COMMIT_HASH
-        QVariant(QOPENHD_GIT_COMMIT_HASH)
+                                             QVariant(QOPENHD_GIT_COMMIT_HASH)
 #else
-        QVariant("unknown")
+                                             QVariant("unknown")
 #endif
-     );
+    );
 
-    //engine.load(QUrl(QLatin1String("qrc:/main.qml")));
-    //const QUrl url("qrc:/qt/qml/hello/qml/main.qml");
-    //const QUrl url(QStringLiteral("qrc:/qt/qml/main.qml"));
-    //const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
+    // engine.load(QUrl(QLatin1String("qrc:/main.qml")));
+    // const QUrl url("qrc:/qt/qml/hello/qml/main.qml");
+    // const QUrl url(QStringLiteral("qrc:/qt/qml/main.qml"));
+    // const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     engine.load(url);
-    //engine.loadFromModule("QOpenHD", "qrc:/main.qml");
-    //engine.loadFromModule("QOpenHDApp","qrc:/main.qml");
-    //engine.load("qml/main.qml");
-    //engine.loadFromModule("QOpenHD", "MainX");
+    // engine.loadFromModule("QOpenHD", "qrc:/main.qml");
+    // engine.loadFromModule("QOpenHDApp","qrc:/main.qml");
+    // engine.load("qml/main.qml");
+    // engine.loadFromModule("QOpenHD", "MainX");
 
 #if defined(__android__)
     QtAndroid::hideSplashScreen();
@@ -438,10 +461,15 @@ int main(int argc, char *argv[]) {
     MavlinkTelemetry::instance().start();
 
     QRenderStats::instance().register_to_root_window(engine);
-    LogMessagesModel::instanceGround().addLogMessage("QOpenHD","running");
+    LogMessagesModel::instanceGround().addLogMessage("QOpenHD", "running");
+
+    ground_video_recorder.start_video_recording();
+    QThread::msleep(10000);
+    ground_video_recorder.stop_video_recording();
+
     const int retval = app.exec();
     // Terminating needs a bit of special care due to the singleton usage and threads
-    qDebug()<<"Terminating";
+    qDebug() << "Terminating";
     MavlinkTelemetry::instance().terminate();
     platform_audio_terminate();
     return retval;
