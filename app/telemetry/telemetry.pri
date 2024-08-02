@@ -27,6 +27,11 @@ SOURCES += \
     app/telemetry/settings/mavlinksettingsmodel.cpp \
     app/telemetry/models/fcmavlinksystem.cpp \
     app/telemetry/models/fcmavlinkmissionitemsmodel.cpp \
+    app/telemetry/ballistic/ballisticcalculator.cpp \
+    app/telemetry/ballistic/ballisticdatastructures.cpp \
+    app/telemetry/ballistic/ballisticdistanceconverter.cpp \
+    app/telemetry/ballistic/ballisticmath.cpp \
+    app/telemetry/ballistic/ballisticcontroller.cpp \
 
 
 HEADERS += \
@@ -64,6 +69,11 @@ HEADERS += \
     app/telemetry/models/fcmavlinksystem.h \
     app/telemetry/models/fcmavlinkmissionitemsmodel.h \
     app/telemetry/models/openhd_core/camera.hpp \
+    app/telemetry/ballistic/ballisticcalculator.hpp \
+    app/telemetry/ballistic/ballisticdatastructures.hpp \
+    app/telemetry/ballistic/ballisticdistanceconverter.hpp \
+    app/telemetry/ballistic/ballisticmath.hpp \
+    app/telemetry/ballistic/ballisticcontroller.hpp \
 
 WindowsBuild{
     LIBS += -lws2_32

@@ -24,6 +24,7 @@
 #include "telemetry/settings/wblinksettingshelper.h"
 #include "telemetry/settings/frequencyhelper.h"
 #include "telemetry/settings/pollutionhelper.h"
+#include "telemetry/ballistic/ballisticcontroller.hpp"
 #include "osd/speedladder.h"
 #include "osd/altitudeladder.h"
 #include "osd/headingladder.h"
@@ -351,6 +352,7 @@ int main(int argc, char *argv[]) {
     engine.rootContext()->setContextProperty("_wifi_card_gnd2", &WiFiCard::instance_gnd(2));
     engine.rootContext()->setContextProperty("_wifi_card_gnd3", &WiFiCard::instance_gnd(3));
     engine.rootContext()->setContextProperty("_wifi_card_air", &WiFiCard::instance_air());
+    engine.rootContext()->setContextProperty("_ballisticController", &BallisticController::instance());
     auto adsbVehicleManager = ADSBVehicleManager::instance();
     engine.rootContext()->setContextProperty("AdsbVehicleManager", adsbVehicleManager);
     adsbVehicleManager->onStarted();

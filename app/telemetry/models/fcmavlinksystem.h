@@ -103,6 +103,7 @@ public: // Stuff needs to be public for qt
     L_RO_PROP(int,satellites_visible,set_satellites_visible,0)
     L_RO_PROP(double,gps_hdop,set_gps_hdop,-1)
     L_RO_PROP(double,gps_vdop,set_gps_vdop,-1)
+    L_RO_PROP(double, cog, set_cog, 0)
     // gps lock type, see: mavlink_gps_raw_int_t / gps_status.fix_type
     L_RO_PROP(int,gps_fix_type,set_gps_fix_type,0)
     L_RO_PROP(QString,gps_status_fix_type_str,set_gps_status_fix_type_str,"Unknown") // User-understandable string for UI
@@ -137,7 +138,7 @@ public: // Stuff needs to be public for qt
     L_RO_PROP(double,lateral_speed,set_lateral_speed,0)  
     L_RO_PROP(double,home_distance,set_home_distance,0)
     L_RO_PROP(int,boot_time,set_boot_time,0)
-    L_RO_PROP(int,hdg,set_hdg,0)
+    L_RO_PROP(double,hdg,set_hdg,0)
     L_RO_PROP(double,ground_speed_meter_per_second,set_ground_speed_meter_per_second,0)
     L_RO_PROP(double,air_speed_meter_per_second,set_air_speed_meter_per_second,0)
 

@@ -153,6 +153,10 @@ bool FCMavlinkSystem::process_message(const mavlink_message_t &msg)
         set_satellites_visible(gps_status.satellites_visible);
         set_gps_hdop(gps_status.eph / 100.0);
         set_gps_vdop(gps_status.epv / 100.0);
+        auto cog_deg = (gps_status.cog != std::numeric_limits<uint16_t>::max()) ?
+                                              static_cast<double>(gps_status.cog) / 100 :
+                                              static_cast<double>(0);
+        set_cog(cog_deg);
         set_gps_fix_type((unsigned int)gps_status.fix_type);
         set_gps_status_fix_type_str(Telemetryutil::mavlink_gps_fix_type_to_string(gps_status.fix_type));
         break;

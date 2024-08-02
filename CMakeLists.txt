@@ -66,6 +66,12 @@ set(QOPENHD_SOURCE_FILES_LIST
     app/telemetry/settings/pollutionhelper.cpp
     app/telemetry/settings/wblinksettingshelper.cpp
     app/telemetry/tutil/geodesi_helper.cpp
+    app/telemetry/ballistic/ballisticcalculator.cpp
+    app/telemetry/ballistic/ballisticdatastructures.cpp
+    app/telemetry/ballistic/ballisticdistanceconverter.cpp
+    app/telemetry/ballistic/ballisticmath.cpp
+    app/telemetry/ballistic/ballisticcontroller.cpp
+    
     #
     #app/videostreaming/vscommon/custom/rawreceiver.cpp
     #app/videostreaming/vscommon/rtp/rtpreceiver.cpp
@@ -97,6 +103,7 @@ target_include_directories(QOpenHDApp PUBLIC app/osd)
 target_include_directories(QOpenHDApp PUBLIC app/util)
 target_include_directories(QOpenHDApp PUBLIC app/telemetry)
 target_include_directories(QOpenHDApp PUBLIC app/telemetry/util)
+target_include_directories(QOpenHDApp PUBLIC app/telemetry/ballistic)
 
 target_include_directories(QOpenHDApp PUBLIC app/videostreaming/vscommon)
 target_include_directories(QOpenHDApp PUBLIC lib)

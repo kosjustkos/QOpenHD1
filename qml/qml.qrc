@@ -69,6 +69,7 @@
         <file>ui/widgets/WindWidget.qml</file>
         <file>ui/widgets/ExampleWidget.qml</file>
         <file>ui/widgets/RollWidget.qml</file>
+        <file>ui/widgets/BallisticWidget.qml</file>
         <file>ui/elements/LanguageSelect.qml</file>
         <file>ui/elements/LanguageSelectForm.ui.qml</file>
         <file alias="round.png">../icons/round.png</file>

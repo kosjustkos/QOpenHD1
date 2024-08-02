@@ -421,4 +421,5 @@ Settings {
     property int qopenhd_frequency_filter_selection: 0;
 
     property bool show_dev_stats_overlay: false
+    property bool show_ballistic_widget: false
 }

@@ -496,6 +496,10 @@ Item {
         MessageHUD {
             id: messageHUD
         }
+
+        BallisticWidget {
+            id: ballisticWidget
+        }
     }
 
     // Extra element - allows customizing the OSD color(s) and more

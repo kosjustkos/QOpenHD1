@@ -1241,6 +1241,21 @@ ScrollView {
                         onCheckedChanged: settings.show_time_widget = checked
                     }
                 }
+
+                SettingBaseElement {
+                    m_short_description: "Show ballistic widget"
+                    m_long_description: "Show ballistic calculator widget (projectile landing point)"
+                    Switch {
+                        width: 32
+                        height: elementHeight
+                        anchors.rightMargin: Qt.inputMethod.visible ? 96 : 36
+
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        checked: settings.show_ballistic_widget
+                        onCheckedChanged: settings.show_ballistic_widget = checked
+                    }
+                }
             }
 
             SettingsCategory {
