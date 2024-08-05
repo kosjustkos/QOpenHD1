@@ -28,6 +28,20 @@ BaseWidget {
         }
     }
 
+    Text {
+        visible:true
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 10
+        id: ballistic_debug_text
+        color: settings.color_text
+        font.pixelSize: 12
+        font.family: settings.font_text
+        text: _ballisticController.getDebugInfo()        
+        style: Text.Outline
+        styleColor: settings.color_glow
+    }
+
     Rectangle {
         id: landingCircle
         width: 30
