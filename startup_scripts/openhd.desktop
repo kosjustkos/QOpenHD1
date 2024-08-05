@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/share/xsessions/start_openhd.sh
+Name=OpenHD
+Comment=Starts pure QOpenHD session
