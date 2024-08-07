@@ -1253,7 +1253,14 @@ ScrollView {
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         checked: settings.show_ballistic_widget
-                        onCheckedChanged: settings.show_ballistic_widget = checked
+                        onCheckedChanged: {
+                            if (checked) {
+                                _ballisticController.startCalculation();    
+                            } else {
+                                _ballisticController.stopCalculation();
+                            }                            
+                            settings.show_ballistic_widget = checked                            
+                        }
                     }
                 }
             }
