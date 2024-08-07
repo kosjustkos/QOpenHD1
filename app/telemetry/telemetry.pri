@@ -32,6 +32,7 @@ SOURCES += \
     app/telemetry/ballistic/ballisticdistanceconverter.cpp \
     app/telemetry/ballistic/ballisticmath.cpp \
     app/telemetry/ballistic/ballisticcontroller.cpp \
+    app/telemetry/ballistic/fisheyecorrector.cpp \
 
 
 HEADERS += \
@@ -74,6 +75,7 @@ HEADERS += \
     app/telemetry/ballistic/ballisticdistanceconverter.hpp \
     app/telemetry/ballistic/ballisticmath.hpp \
     app/telemetry/ballistic/ballisticcontroller.hpp \
+    app/telemetry/ballistic/fisheyecorrector.hpp \
 
 WindowsBuild{
     LIBS += -lws2_32

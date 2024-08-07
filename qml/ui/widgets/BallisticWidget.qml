@@ -37,7 +37,7 @@ BaseWidget {
         color: settings.color_text
         font.pixelSize: 12
         font.family: settings.font_text
-        text: _ballisticController.getDebugInfo()        
+        text: "Loading"      
         style: Text.Outline
         styleColor: settings.color_glow
     }
@@ -50,7 +50,18 @@ BaseWidget {
         border.width: 4
         border.color: "green"
         radius: 15
-        x: (ballisticWidget.parent.width - width) / 2 + get_shift(BallisticWidget.ShiftAxis.X);
-        y: (ballisticWidget.parent.height - height) / 2 + get_shift(BallisticWidget.ShiftAxis.Y);        
+        x: (ballisticWidget.parent.width - width) / 2;
+        y: (ballisticWidget.parent.height - height) / 2;
+    }
+
+    Timer {
+        interval: 200 // 200ms
+        repeat: true
+        running: true
+        onTriggered: {
+            ballistic_debug_text.text = _ballisticController.getDebugInfo();
+            landingCircle.x = (ballisticWidget.parent.width - landingCircle.width) / 2 + get_shift(BallisticWidget.ShiftAxis.X);
+            landingCircle.y = (ballisticWidget.parent.height - landingCircle.height) / 2 + get_shift(BallisticWidget.ShiftAxis.Y);
+        }
     }
 }

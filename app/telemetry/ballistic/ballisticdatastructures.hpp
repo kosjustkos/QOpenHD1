@@ -9,6 +9,11 @@ struct Point {
     int y;
 };
 
+// Camera distortion coefficients
+struct DistortionCoefficients {
+    double k1, k2, k3, k4, k5;
+};
+
 // Cross-sectional areas in the flight direction
 // https://energyeducation.ca/encyclopedia/Cross-sectional_area
 struct CrossSectionalAreas {

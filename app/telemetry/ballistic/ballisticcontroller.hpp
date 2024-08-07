@@ -15,7 +15,7 @@ public:
     static BallisticController& instance();
     BallisticController();
     Q_INVOKABLE QList<int> getBallisticShifts() const;
-    Q_INVOKABLE QString getDebugInfo() const;
+    Q_INVOKABLE QString getDebugInfo();
 
 private:    
     const BallisticCalculator m_calculator;

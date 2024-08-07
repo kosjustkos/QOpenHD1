@@ -28,8 +28,8 @@ namespace {
 }
 
 BallisticController::BallisticController()
-    : m_calculator(ProjectileParameters(0.5, CrossSectionalAreas{0.0113, 0.0113, 0.0216}, DragCoefficients{1.82, 1.82, 1.52}), 902.0f, 1.0f) {    
-    // focal len and len correction are hardcoded for now. Will be passed from some external source (air unit?)
+    : m_calculator(ProjectileParameters(0.5, CrossSectionalAreas{0.0113, 0.0113, 0.0216}, DragCoefficients{1.82, 1.82, 1.52}), DistortionCoefficients{0.04326691, -0.04997936,  0.00245744,  0.00115149, -0.01736539}, 902.0f, 1.0f) {    
+    // camera distortion coefficients, focal len and len correction are hardcoded for now. Will be passed from some external source (air unit?)
 }
 
 BallisticController& BallisticController::instance() {
@@ -54,7 +54,7 @@ QList<int> BallisticController::getBallisticShifts() const {
     return shifts_qt;
 }
 
-QString BallisticController::getDebugInfo() const {
+QString BallisticController::getDebugInfo() {
     MavlinkData mavData = MavlinkData(&FCMavlinkSystem::instance());
     return "vn: " + QString::number(mavData.vn, 'f', 2) +
             " ve: " + QString::number(mavData.ve, 'f', 2) +

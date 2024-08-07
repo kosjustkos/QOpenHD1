@@ -71,6 +71,7 @@ set(QOPENHD_SOURCE_FILES_LIST
     app/telemetry/ballistic/ballisticdistanceconverter.cpp
     app/telemetry/ballistic/ballisticmath.cpp
     app/telemetry/ballistic/ballisticcontroller.cpp
+    app/telemetry/ballistic/fisheyecorrector.cpp
     
     #
     #app/videostreaming/vscommon/custom/rawreceiver.cpp
